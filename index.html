@@ -1766,7 +1766,7 @@ function showResult() {
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 4000);
       // 0.6秒後にLINE公式アカウントを開く
-      setTimeout(() => { window.open('https://lin.ee/424jmwsb', '_blank'); }, 600);
+      setTimeout(() => { if (navigator.share) { navigator.share({ title: '住まい診断結果', text: lineMsg }); }}, 600);
     };
   });
 
@@ -1828,3 +1828,4 @@ async function saveResultImage() {
 </script>
 </body>
 </html>
+
