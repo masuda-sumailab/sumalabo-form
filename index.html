@@ -754,7 +754,7 @@ let state = {
 
 let quizIndex = 0;
 let quizAnswers = {};
-
+let top3Results = [];
 // スキップすべき質問IDを返す
 function getSkippedIds() {
   const skip = new Set();
@@ -1581,7 +1581,7 @@ function showResult() {
 
   const results = AREAS.map(area => {
     const commuteTime = calcCommute(area);
-    const rent = area.rent[state.roomType] || area.rent['1R1K'];
+    const rent = area.rent || area.rent['1R1K'];
 
     const rawCommute = commuteTime <= state.commuteMax
       ? Math.max(0, 40 - commuteTime)
@@ -1629,7 +1629,7 @@ function showResult() {
 
   results.sort((a, b) => b.score - a.score);
   const top3 = results.slice(0, 3);
-
+top3Results = top3;
   // サブタイトル
   const rentLabel = state.rentMax === 999999 ? '上限なし' : state.rentMax.toLocaleString() + '円';
   document.getElementById('resultSubtitle').textContent =
@@ -1736,7 +1736,7 @@ function showResult() {
     '▼ おすすめエリア TOP3',
   ].concat(
     top3.map((a,i) => ['1位','2位','3位'][i] + ': ' + a.name
-      + ' (乗車約' + a.commuteTime + '分 / 目安' + (a.rent[state.roomType]/10000).toFixed(1) + '万円)')
+      + ' (乗車約' + a.commuteTime + '分 / 目安' + (a.rent/10000).toFixed(1) + '万円)')
   ).concat([
     '',
     '詳しくご提案をお願いします！'
@@ -1777,7 +1777,29 @@ function showResult() {
     });
   }, 120);
 }
+function shareWithLineFriends() {
+  const mbtiType = deriveMBTI();
+  const mbtiName = (MBTI_DATA[mbtiType] || {name:'-'}).name;
 
+  const lines = [
+    '住まらぼ 住まいエリア診断',
+    '',
+    'MBTIタイプ: ' + mbtiType + ' (' + mbtiName + ')',
+    '',
+    'おすすめエリア TOP3',
+  ];
+
+  top3Results.forEach((a, i) => {
+    const rentStr = (a.rent / 10000).toFixed(1) + '万円';
+    lines.push((i + 1) + '位: ' + a.name + ' (乗車約' + a.commuteTime + '分 / 目安' + rentStr + ')');
+  });
+
+  lines.push('');
+  lines.push('あなたも試してみてね');
+  lines.push('https://sumalabo-line.vercel.app/');
+
+  window.open('https://line.me/R/msg/text/?' + encodeURIComponent(lines.join('\n')), '_blank');
+}
 // ===========================
 // 結果を画像化してLINEに送る
 // ===========================
